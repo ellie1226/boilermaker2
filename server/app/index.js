@@ -4,27 +4,42 @@ const express = require('express');
 const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
-// const session = require('express-session');
-// const db = require('../db/db.js');
+const session = require('express-session');
+const db = require('../db/db.js');
+const passport = require('passport');
+
+// this means that we need to make sure our local NODE_ENV variable is in fact set to 'development'
+// Node may have actually done this for you when you installed it! If not though, be sure to do that.
+if (process.env.NODE_ENV === 'development') {
+    require('../auth/secrets'); // this will mutate the process.env object with your secrets.
+  }
+// require('../auth/secrets'); // mutate the process.env object with your variables
+// require('./mainApp')       // run your app after you're sure the env variables are set.
 
 // configure and create our database store
-// const SequelizeStore = require('connect-session-sequelize')(session.Store);
-// const dbStore = new SequelizeStore({ db: db });
+const SequelizeStore = require('connect-session-sequelize')(session.Store);
+const dbStore = new SequelizeStore({ db: db });
 
 // sync so that our session table gets created
-// dbStore.sync();
+dbStore.sync();
 
 //Assuming we'll attach the session middleware to our app (but we could also be attaching it to a router that our app uses.
 //by default session info will be stored in memory for life of your server process
 //Then, on our deployment server, we can set an environment variable called SESSION_SECRET with our real secret!
 // plug the store into our session middleware
 
-// app.use(session({
-//   secret: process.env.SESSION_SECRET || 'a wildly insecure secret',
-//   store: dbStore,
-//   resave: false,
-//   saveUninitialized: false
-// }));
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'a wildly insecure secret',
+  store: dbStore,
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// app.use("/passport", require("./passport")); ???
+// app.use("/auth", require("../auth")); ??
 
 // need body parser if you want to use re.body
 app.use(bodyParser.json());
@@ -37,6 +52,7 @@ app.use(morgan('dev'));
 app.use(express.static(path.join(__dirname, '../../public')))
 
 app.use('/api', require('../api/index')); // matches all requests to /api
+
 
 // Any routes or other various middlewares should go here!
 

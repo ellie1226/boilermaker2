@@ -2,7 +2,7 @@
 const router = require("express").Router();
 
 //this is for mounting page
-router.use('/sample', require('./sample')); // matches all requests to /api/users/
+router.use('/user', require('./user')); // matches all requests to /api/users/
 // router.use('/puppies', require('./puppies')); // matches all requests to  /api/puppies/
 // router.use('/kittens', require('./kittens')); // matches all requests to  /api/kittens/
 
